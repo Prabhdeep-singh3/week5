@@ -1,17 +1,29 @@
-name: Build and Upload Artifact
+name: Artifact Demo
 on: [push]
 
 jobs:
-  build:
+  upload-job:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
-      - name: Generate a file
-        run: echo "This is a test artifact" > artifact.txt
+      - name: Create a test file
+        run: echo "Hello World" > my-file.txt
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v3
         with:
-          name: test-artifact
-          path: artifact.txt
+          name: my-artifact
+          path: my-file.txt
+
+  download-job:
+    needs: upload-job  # Waits for upload-job to finish
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download Artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: my-artifact
+
+      - name: Display the file
+        run: cat my-file.txt
