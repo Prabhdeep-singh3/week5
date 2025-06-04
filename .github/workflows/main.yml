@@ -2,28 +2,39 @@ name: Artifact Demo
 on: [push]
 
 jobs:
-  upload-job:
+  build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
-      - name: Create a test file
-        run: echo "Hello World" > my-file.txt
-
-      - name: Upload Artifact
+      
+      - name: Create test files
+        run: |
+          mkdir -p build
+          echo "Compiled binary" > build/app.exe
+          echo "Test results" > test-report.xml
+          
+      - name: Upload Build Artifacts
         uses: actions/upload-artifact@v3
         with:
-          name: my-artifact
-          path: my-file.txt
-
-  download-job:
-    needs: upload-job  # Waits for upload-job to finish
+          name: build-output
+          path: |
+            build/app.exe
+            test-report.xml
+          
+  test:
+    needs: build
     runs-on: ubuntu-latest
     steps:
-      - name: Download Artifact
+      - uses: actions/checkout@v4
+      
+      - name: Download Artifacts
         uses: actions/download-artifact@v3
         with:
-          name: my-artifact
-
-      - name: Display the file
-        run: cat my-file.txt
+          name: build-output
+          path: downloaded-artifacts
+          
+      - name: Verify Files
+        run: |
+          ls -R downloaded-artifacts
+          cat downloaded-artifacts/build/app.exe
+          cat downloaded-artifacts/test-report.xml
